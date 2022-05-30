@@ -38,7 +38,7 @@ func (r *queryResolver) PaginatedTrucks(ctx context.Context) ([]*model.Truck, er
 }
 
 func (r *queryResolver) PaginatedShipments(ctx context.Context, id *string, name *string, origin *string, destination *string, deliveryDate *string, page int, first int) ([]*model.Shipment, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.Shipments, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
