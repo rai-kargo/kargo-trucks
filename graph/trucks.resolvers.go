@@ -33,7 +33,7 @@ func (r *mutationResolver) SaveShipment(ctx context.Context, id *string, name st
 	return shipment, nil
 }
 
-func (r *queryResolver) PaginatedTrucks(ctx context.Context) ([]*model.Truck, error) {
+func (r *queryResolver) PaginatedTrucks(ctx context.Context, id *string, plateNo *string, page int, first int) ([]*model.Truck, error) {
 	return r.Trucks, nil
 }
 

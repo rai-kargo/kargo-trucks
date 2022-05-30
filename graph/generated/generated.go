@@ -51,7 +51,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		PaginatedShipments func(childComplexity int, id *string, name *string, origin *string, destination *string, deliveryDate *string, page int, first int) int
-		PaginatedTrucks    func(childComplexity int) int
+		PaginatedTrucks    func(childComplexity int, id *string, plateNo *string, page int, first int) int
 	}
 
 	Shipment struct {
@@ -74,7 +74,7 @@ type MutationResolver interface {
 	SaveShipment(ctx context.Context, id *string, name string, origin string, destination string, deliveryDate string, truckID *string) (*model.Shipment, error)
 }
 type QueryResolver interface {
-	PaginatedTrucks(ctx context.Context) ([]*model.Truck, error)
+	PaginatedTrucks(ctx context.Context, id *string, plateNo *string, page int, first int) ([]*model.Truck, error)
 	PaginatedShipments(ctx context.Context, id *string, name *string, origin *string, destination *string, deliveryDate *string, page int, first int) ([]*model.Shipment, error)
 }
 
@@ -134,7 +134,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.PaginatedTrucks(childComplexity), true
+		args, err := ec.field_Query_paginatedTrucks_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.PaginatedTrucks(childComplexity, args["id"].(*string), args["plateNo"].(*string), args["page"].(int), args["first"].(int)), true
 
 	case "Shipment.delivery_date":
 		if e.complexity.Shipment.DeliveryDate == nil {
@@ -278,7 +283,13 @@ type Shipment {
 
 
 type Query {
- paginatedTrucks: [Truck!]!
+ paginatedTrucks(
+   id: String
+   plateNo: String
+   page: Int!
+   first: Int!
+  ): [Truck!]!
+  
  paginatedShipments(
    id: String
    name: String
@@ -483,6 +494,48 @@ func (ec *executionContext) field_Query_paginatedShipments_args(ctx context.Cont
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_paginatedTrucks_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["plateNo"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("plateNo"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["plateNo"] = arg1
+	var arg2 int
+	if tmp, ok := rawArgs["page"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("page"))
+		arg2, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["page"] = arg2
+	var arg3 int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg3, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg3
+	return args, nil
+}
+
 func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -665,7 +718,7 @@ func (ec *executionContext) _Query_paginatedTrucks(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().PaginatedTrucks(rctx)
+		return ec.resolvers.Query().PaginatedTrucks(rctx, fc.Args["id"].(*string), fc.Args["plateNo"].(*string), fc.Args["page"].(int), fc.Args["first"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -697,6 +750,17 @@ func (ec *executionContext) fieldContext_Query_paginatedTrucks(ctx context.Conte
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Truck", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_paginatedTrucks_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
 	}
 	return fc, nil
 }

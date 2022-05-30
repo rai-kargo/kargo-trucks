@@ -17,7 +17,13 @@ type Shipment {
 
 
 type Query {
- paginatedTrucks: [Truck!]!
+ paginatedTrucks(
+   id: String
+   plateNo: String
+   page: Int!
+   first: Int!
+  ): [Truck!]!
+  
  paginatedShipments(
    id: String
    name: String
