@@ -52,4 +52,6 @@ type Mutation {
    deliveryDate: String!,
    truckId: ID,
   ): Shipment!
+
+ sendTruckDataToEmail(email: String!): Boolean!
 }
