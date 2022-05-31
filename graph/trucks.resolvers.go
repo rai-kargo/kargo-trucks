@@ -6,6 +6,8 @@ package graph
 import (
 	"context"
 	"fmt"
+	"log"
+	"sync"
 
 	"github.com/rai-kargo/kargo-trucks/graph/generated"
 	"github.com/rai-kargo/kargo-trucks/graph/model"
@@ -32,6 +34,33 @@ func (r *mutationResolver) SaveShipment(ctx context.Context, id *string, name st
 	}
 	r.Shipments = append(r.Shipments, shipment)
 	return shipment, nil
+}
+
+func (r *mutationResolver) SendTruckDataToEmail(ctx context.Context, email string) (bool, error) {
+	wg := sync.WaitGroup{}
+	wg.Add(len(r.Trucks) / 10)
+
+	for i := 0; i < len(r.Trucks)/10; i++ {
+		// In go routine we are only reading val from map
+		go func(rs *mutationResolver) {
+			defer wg.Done()
+			truckData := rs.generateTruckData()
+			_, err := generateCSVData(truckData)
+			if err != nil {
+				log.Println(err)
+			}
+
+			fmt.Println(truckData)
+
+			// err = sendEmail(csvFilename, email)
+			// if err != nil {
+			// 	log.Println(err)
+			// }
+		}(r)
+	}
+
+	wg.Wait()
+	return true, nil
 }
 
 func (r *queryResolver) PaginatedTrucks(ctx context.Context, id *string, plateNo *string, page int, first int) ([]*model.Truck, error) {
