@@ -11,10 +11,11 @@ import (
 	"github.com/rai-kargo/kargo-trucks/graph/model"
 )
 
-func (r *mutationResolver) SaveTruck(ctx context.Context, id *string, plateNo string) (*model.Truck, error) {
+func (r *mutationResolver) SaveTruck(ctx context.Context, id *string, plateNo string, isdeleted bool) (*model.Truck, error) {
 	truck := &model.Truck{
-		ID:      fmt.Sprintf("TRUCK-%d", len(r.Trucks)+1),
-		PlateNo: plateNo,
+		ID:        fmt.Sprintf("TRUCK-%d", len(r.Trucks)+1),
+		PlateNo:   plateNo,
+		Isdeleted: isdeleted,
 	}
 	r.Trucks = append(r.Trucks, truck)
 	return truck, nil
